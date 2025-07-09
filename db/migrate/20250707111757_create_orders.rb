@@ -7,7 +7,7 @@ class CreateOrders < ActiveRecord::Migration[8.0]
         user_id BIGINT NOT NULL,
         product_id BIGINT NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
         CONSTRAINT fk_orders_user_id
           FOREIGN KEY (user_id) REFERENCES users(id)

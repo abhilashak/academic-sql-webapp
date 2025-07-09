@@ -1,8 +1,11 @@
 # app/models/user.rb
 class User < ApplicationRecord
   has_many :orders
-  validates :name, presence: true
-  validate :email, presence: true,
+  has_one :student, required: false
+
+  validates :first_name, presence: true
+  validates :last_name, presence: true
+  validates :email, presence: true,
                    format: {
                     with: /\A[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/,
                     message: "must be a valid email address"
@@ -11,7 +14,7 @@ class User < ApplicationRecord
 
   # find all users who ordered N orders in last M days
   # using AR query method
-  scope :with_min_orders_in_last_days, ->(min_orders:, days:) {
+  scope :ar_min_orders_in_last_days, ->(min_orders:, days:) {
     select("users.*, count(orders.id) as order_count")
     .joins(:orders)
     .where("orders.created_at >= ?", days.days.ago)

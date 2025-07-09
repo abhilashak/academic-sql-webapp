@@ -1,4 +1,6 @@
 class Product < ApplicationRecord
+  has_many :orders
+
   validates_presence_of :title, :price, :category, :stock_quantity
   validates :price, numericality: { greater_than: 0 }
   validates :category, inclusion: { in: %w[women men kids infants] }

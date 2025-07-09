@@ -27,7 +27,7 @@ CREATE TYPE public.category_enum AS ENUM (
 
 CREATE TYPE public.gender_enum AS ENUM (
     'male',
-    'famale',
+    'female',
     'not-specified'
 );
 
@@ -46,6 +46,38 @@ CREATE TABLE public.ar_internal_metadata (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: courses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.courses (
+    id bigint NOT NULL,
+    title character varying(200) NOT NULL,
+    description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: courses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.courses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: courses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.courses_id_seq OWNED BY public.courses.id;
 
 
 --
@@ -127,6 +159,71 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: schools; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.schools (
+    id bigint NOT NULL,
+    title character varying(200) NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: schools_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.schools_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: schools_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.schools_id_seq OWNED BY public.schools.id;
+
+
+--
+-- Name: students; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.students (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    course_id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    enrolment_date date NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: students_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.students_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: students_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.students_id_seq OWNED BY public.students.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -165,6 +262,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: courses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses ALTER COLUMN id SET DEFAULT nextval('public.courses_id_seq'::regclass);
+
+
+--
 -- Name: orders id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -176,6 +280,20 @@ ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.order
 --
 
 ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.products_id_seq'::regclass);
+
+
+--
+-- Name: schools id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.schools ALTER COLUMN id SET DEFAULT nextval('public.schools_id_seq'::regclass);
+
+
+--
+-- Name: students id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students ALTER COLUMN id SET DEFAULT nextval('public.students_id_seq'::regclass);
 
 
 --
@@ -191,6 +309,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: courses courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses
+    ADD CONSTRAINT courses_pkey PRIMARY KEY (id);
 
 
 --
@@ -218,6 +344,30 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: schools schools_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.schools
+    ADD CONSTRAINT schools_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: students students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students
+    ADD CONSTRAINT students_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: students unique_students_user_id; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students
+    ADD CONSTRAINT unique_students_user_id UNIQUE (user_id);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -237,6 +387,20 @@ CREATE INDEX idx_orders_product_id ON public.orders USING btree (product_id);
 --
 
 CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
+
+
+--
+-- Name: idx_students_course_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_students_course_id ON public.students USING btree (course_id);
+
+
+--
+-- Name: idx_students_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_students_school_id ON public.students USING btree (school_id);
 
 
 --
@@ -263,13 +427,40 @@ ALTER TABLE ONLY public.orders
 
 
 --
+-- Name: students fk_students_course_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students
+    ADD CONSTRAINT fk_students_course_id FOREIGN KEY (course_id) REFERENCES public.courses(id);
+
+
+--
+-- Name: students fk_students_school_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students
+    ADD CONSTRAINT fk_students_school_id FOREIGN KEY (school_id) REFERENCES public.schools(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: students fk_students_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.students
+    ADD CONSTRAINT fk_students_user_id FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250709155152'),
+('20250709155145'),
 ('20250709074552'),
+('20250709072153'),
 ('20250708065919'),
 ('20250707111757'),
 ('20250707111110');

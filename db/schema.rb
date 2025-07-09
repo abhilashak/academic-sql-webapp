@@ -10,14 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_09_074552) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_09_155152) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "category_enum", ["men", "women", "kids", "infants"]
-  create_enum "gender_enum", ["male", "famale", "not-specified"]
+  create_enum "gender_enum", ["male", "female", "not-specified"]
+
+  create_table "courses", force: :cascade do |t|
+    t.string "title", limit: 200, null: false
+    t.text "description"
+    t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+  end
 
   create_table "orders", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -40,6 +47,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_09_074552) do
     t.check_constraint "price > 0::numeric", name: "products_price_check"
   end
 
+  create_table "schools", force: :cascade do |t|
+    t.string "title", limit: 200, null: false
+    t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+  end
+
+  create_table "students", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "school_id", null: false
+    t.date "enrolment_date", null: false
+    t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["course_id"], name: "idx_students_course_id"
+    t.index ["school_id"], name: "idx_students_school_id"
+    t.unique_constraint ["user_id"], name: "unique_students_user_id"
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "email", limit: 150, null: false
     t.string "phone_number", limit: 20
@@ -55,4 +80,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_09_074552) do
 
   add_foreign_key "orders", "products", name: "fk_orders_product_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "orders", "users", name: "fk_orders_user_id", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "students", "courses", name: "fk_students_course_id"
+  add_foreign_key "students", "schools", name: "fk_students_school_id", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "students", "users", name: "fk_students_user_id", on_update: :cascade, on_delete: :cascade
 end

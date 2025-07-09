@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_08_065919) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_09_074552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "category_enum", ["men", "women", "kids", "infants"]
+  create_enum "gender_enum", ["male", "famale", "not-specified"]
 
   create_table "orders", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -40,11 +41,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_08_065919) do
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
-    t.string "name", limit: 200, null: false
     t.string "email", limit: 150, null: false
     t.string "phone_number", limit: 20
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "first_name", limit: 100, null: false
+    t.string "middle_name", limit: 100
+    t.string "last_name", limit: 100, null: false
+    t.enum "gender", enum_type: "gender_enum"
+    t.date "date_of_birth"
     t.index ["email"], name: "idx_users_email"
   end
 
